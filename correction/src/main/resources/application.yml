@@ -1,0 +1,39 @@
+server:
+  port: 8083
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5433/t1_homework
+    username: postgres
+    password: "0000"
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+t1:
+  retry:
+    page-size: 1000
+    interval: 60000
+    max-attempts: 3
+  client-url: ${CLIENT_HOST:localhost:8081}
+  kafka:
+    topic:
+      error-transaction: t1_demo_client_transaction_errors
+      correction: t1_demo_transaction_correction
+    listener:
+      transaction-error: transaction-error
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: correction
+
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 5000
+        read-timeout: 10000
