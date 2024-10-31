@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import ru.kai.homework.correction.model.enums.TransactionStatus;
 
 import java.util.UUID;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 public interface TransactionServiceClient {
 
     @PostMapping("/retry_transaction")
-    ResponseEntity<Void> retryTransaction(
+    ResponseEntity<TransactionStatus> retryTransaction(
             @RequestBody UUID transactionId,
             @RequestHeader("Authorization") String jwtToken
     );

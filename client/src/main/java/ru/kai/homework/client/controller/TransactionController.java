@@ -3,12 +3,13 @@ package ru.kai.homework.client.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import ru.kai.homework.client.model.Transaction;
 import ru.kai.homework.client.model.dto.response.MessageResponse;
+import ru.kai.homework.client.model.enums.TransactionStatus;
 import ru.kai.homework.client.service.TransactionService;
 
 import java.util.UUID;
@@ -26,11 +27,8 @@ public class TransactionController {
     }
 
     @PostMapping("/retry_transaction")
-    public ResponseEntity<Void> retryTransaction(@Valid @RequestBody UUID transactionId) {
-        boolean isProcessed = transactionService.retryTransaction(transactionId);
-        if (isProcessed) {
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    public ResponseEntity<TransactionStatus> retryTransaction(@Valid @RequestBody UUID transactionId) {
+        Transaction transaction = transactionService.retryTransaction(transactionId);
+        return ResponseEntity.ok(transaction.getStatus());
     }
 }

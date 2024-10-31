@@ -4,8 +4,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.kai.homework.client.exception.AccountBlockedException;
-import ru.kai.homework.client.exception.AccountNotFoundException;
 import ru.kai.homework.client.exception.InsufficientFundsException;
 import ru.kai.homework.client.exception.TransactionNotFoundException;
 import ru.kai.homework.client.kafka.TransactionProducer;
@@ -13,7 +11,6 @@ import ru.kai.homework.client.mapper.TransactionMapper;
 import ru.kai.homework.client.model.Account;
 import ru.kai.homework.client.model.Transaction;
 import ru.kai.homework.client.model.dto.request.TransactionRequest;
-import ru.kai.homework.client.model.enums.AccountType;
 import ru.kai.homework.client.model.enums.TransactionStatus;
 import ru.kai.homework.client.model.enums.OperationType;
 import ru.kai.homework.client.repository.TransactionRepository;
@@ -62,23 +59,32 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Transactional
-    public boolean retryTransaction(UUID transactionId) {
+    public Transaction retryTransactionWithErrorHandling(UUID transactionId) {
+        Transaction transaction = retryTransaction(transactionId);
+        if (transaction.getStatus() == TransactionStatus.ERROR) {
+            handleErrorTransaction(transaction);
+        }
+        return transaction;
+    }
+
+    @Transactional
+    public Transaction retryTransaction(UUID transactionId) {
         Transaction transaction = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new TransactionNotFoundException(transactionId));
         Account account = transaction.getAccount();
 
-        if (account.getType() == AccountType.CREDIT && account.getBalance().compareTo(BigDecimal.ZERO) <= 0)
-            return false;
+        if (isNonRetryableStatus(transaction))
+            return transaction;
 
         try {
             processTransaction(transaction);
             transaction.setStatus(TransactionStatus.PROCESSED);
             account.setBlocked(false);
+            return transaction;
         } catch (InsufficientFundsException e) {
-            handleErrorTransaction(transaction);
-            return false;
+            transaction.setStatus(TransactionStatus.ERROR);
+            return transaction;
         }
-        return true;
     }
 
     private void handleErrorTransaction(Transaction transaction) {
@@ -111,5 +117,10 @@ public class TransactionServiceImpl implements TransactionService {
         compensatingTransaction.setStatus(TransactionStatus.WAITING);
         return compensatingTransaction;
     }
+
+    private boolean isNonRetryableStatus(Transaction transaction) {
+        return transaction.getStatus() == TransactionStatus.CANCELLED || transaction.getStatus() == TransactionStatus.PROCESSED;
+    }
+
 }
 

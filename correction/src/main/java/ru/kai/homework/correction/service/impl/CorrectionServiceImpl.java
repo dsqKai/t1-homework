@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 import ru.kai.homework.correction.feign.TransactionServiceClient;
 import ru.kai.homework.correction.kafka.CorrectionProducer;
 import ru.kai.homework.correction.model.Correction;
-import ru.kai.homework.correction.model.CorrectionStatus;
+import ru.kai.homework.correction.model.enums.CorrectionStatus;
+import ru.kai.homework.correction.model.enums.TransactionStatus;
 import ru.kai.homework.correction.repository.CorrectionRepository;
 import ru.kai.homework.correction.service.CorrectionService;
 
@@ -36,12 +37,12 @@ public class CorrectionServiceImpl implements CorrectionService {
                 .orElse(new Correction(transactionId, 0, CorrectionStatus.PENDING));
         correction.setStatus(CorrectionStatus.PENDING);
         if (correction.getAttempts() < maxAttempts) {
-            ResponseEntity<Void> response = transactionServiceClient.retryTransaction(transactionId, "TEST");
+            ResponseEntity<TransactionStatus> response = transactionServiceClient.retryTransaction(transactionId, "TEST");
             correction.incrementAttempts();
-            if(response.getStatusCode().is2xxSuccessful()) {
-                repository.deleteById(transactionId);
-            } else {
+            if(response.getBody() == TransactionStatus.ERROR) {
                 repository.save(correction);
+            } else {
+                repository.deleteById(transactionId);
             }
         }
     }

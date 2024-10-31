@@ -2,6 +2,7 @@ package ru.kai.homework.correction.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.kai.homework.correction.model.enums.CorrectionStatus;
 
 import java.util.UUID;
 

@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.kai.homework.correction.model.Correction;
-import ru.kai.homework.correction.model.CorrectionStatus;
+import ru.kai.homework.correction.model.enums.CorrectionStatus;
 
 import java.util.UUID;
 

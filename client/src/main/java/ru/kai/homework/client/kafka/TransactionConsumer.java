@@ -37,7 +37,7 @@ public class TransactionConsumer {
     public void listenerCorrectionTransaction(@Payload List<UUID> messageList) {
         for(UUID transactionId : messageList) {
             try {
-                transactionService.retryTransaction(transactionId);
+                transactionService.retryTransactionWithErrorHandling(transactionId);
             } catch (Exception e) {
                 log.error("Failed to process Kafka message transaction ID: {}", transactionId, e);
             }
