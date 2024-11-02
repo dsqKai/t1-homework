@@ -7,11 +7,17 @@ services:
       - 'POSTGRES_USER=postgres'
     ports:
       - '5433:5432'
+    networks:
+      - my_network
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   zookeeper_t1:
     image: confluentinc/cp-zookeeper:5.5.0
     hostname: zookeeper_t1
     container_name: zookeeper
+    networks:
+      - my_network
     ports:
       - "2182:2182"
     environment:
@@ -21,6 +27,8 @@ services:
     image: confluentinc/cp-kafka:5.5.0
     hostname: broker_t1
     container_name: broker
+    networks:
+      - my_network
     depends_on:
       - zookeeper_t1
     ports:
@@ -36,26 +44,49 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
 
-#  client-service:
-#    depends_on: [postgres]
-#    build: ./client
-#    environment:
-#      DB_HOST: postgres
-#    ports:
-#      - "8081:8080"
-#
-#  transaction-service:
-#    depends_on: [postgres]
-#    build: ./transaction
-#    environment:
-#      KAFKA_SERVER: broker_t1
-#    ports:
-#      - "8082:8080"
-#
-#  correction-service:
-#    depends_on: [postgres]
-#    build: ./correction
-#    environment:
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5433/t1_homework
-#    ports:
-#      - "8083:8080"
+  gateway:
+    build: ./gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - my_network
+    environment:
+      CLIENT_HOST: client-service
+      TRANSACTION_HOST: transaction-service
+      CORRECTION_HOST: correction-service
+
+  client-service:
+    depends_on: [postgres, broker_t1]
+    build: ./client
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      KAFKA_SERVER: broker_t1
+      KAFKA_PORT: 29092
+    networks:
+      - my_network
+
+  transaction-service:
+    depends_on: [broker_t1]
+    build: ./transaction
+    environment:
+      KAFKA_SERVER: broker_t1
+      KAFKA_PORT: 29092
+    networks:
+      - my_network
+
+  correction-service:
+    depends_on: [postgres, broker_t1]
+    build: ./correction
+    environment:
+      KAFKA_SERVER: broker_t1
+      KAFKA_PORT: 29092
+      CLIENT_HOST: client-service:8081
+      DB_HOST: postgres
+      DB_PORT: 5432
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge

@@ -8,6 +8,7 @@
     <name>t1-homework</name>
     <packaging>pom</packaging>
     <modules>
+        <module>gateway</module>
         <module>client</module>
         <module>transaction</module>
         <module>correction</module>

@@ -2,7 +2,7 @@ server:
   port: 8082
 t1:
   kafka:
-    bootstrap-server: ${KAFKA_SERVER:localhost:9092}
+    bootstrap-server: ${KAFKA_SERVER:localhost}:${KAFKA_PORT:9092}
     topic:
       transaction: t1_demo_client_transactions
 

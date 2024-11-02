@@ -10,7 +10,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import ru.kai.homework.client.kafka.TransactionProducer;
+import ru.kai.homework.correction.kafka.CorrectionProducer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,9 +31,9 @@ public class KafkaProducerConfig<T> {
 
     @Bean
     @Primary
-    public TransactionProducer producerCorrection(KafkaTemplate<String, UUID> template) {
+    public CorrectionProducer producerCorrection(KafkaTemplate<String, UUID> template) {
         template.setDefaultTopic(correctionTopic);
-        return new TransactionProducer(template);
+        return new CorrectionProducer(template);
     }
 
     @Bean("producerFactory")

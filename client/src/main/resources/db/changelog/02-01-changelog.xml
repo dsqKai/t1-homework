@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+    <changeSet id="1730559668253-1" author="1">
+        <createTable tableName="accounts">
+            <column name="balance" type="NUMBER(19, 2)"/>
+            <column name="is_blocked" type="BOOLEAN"/>
+            <column name="client_id" type="UUID"/>
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="accounts_pkey"/>
+            </column>
+            <column name="type" type="VARCHAR(20)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1730559668253-2" author="1">
+        <createTable tableName="clients">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="clients_pkey"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)"/>
+            <column name="last_name" type="VARCHAR(255)"/>
+            <column name="middle_name" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1730559668253-4" author="1">
+        <createTable tableName="transactions">
+            <column name="amount" type="NUMBER(19, 2)"/>
+            <column name="account_id" type="UUID"/>
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="transactions_pkey"/>
+            </column>
+            <column name="status" type="VARCHAR(20)"/>
+            <column name="type" type="VARCHAR(20)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="1730559668253-5" author="1">
+        <addForeignKeyConstraint baseColumnNames="account_id" baseTableName="transactions"
+                                 constraintName="fk20w7wsg13u9srbq3bd7chfxdh" onDelete="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="accounts"/>
+    </changeSet>
+    <changeSet id="1730559668253-6" author="1">
+        <addForeignKeyConstraint baseColumnNames="client_id" baseTableName="accounts"
+                                 constraintName="fkgymog7firrf8bnoiig61666ob" onDelete="NO ACTION"
+                                 referencedColumnNames="id" referencedTableName="clients"/>
+    </changeSet>
+</databaseChangeLog>

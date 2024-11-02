@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: gateway
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      routes:
+        - id: client-service
+          uri: http://${CLIENT_HOST:localhost}:8081
+          predicates:
+            - Path=/client/**
+          filters:
+            - StripPrefix=1
+        - id: transaction-service
+          uri: http://${TRANSACTION_HOST:localhost}:8082
+          predicates:
+            - Path=/transaction/**
+          filters:
+            - StripPrefix=1
+        - id: correction-service
+          uri: http://${CORRECTION_HOST:localhost}:8083
+          predicates:
+            - Path=/correction/**
+          filters:
+            - StripPrefix=1
+
+security:
+  jwt-secret: testtesttesttesttesttesttesttesttesttesttesttesttesttesttest
+server:
+  port: 8080
