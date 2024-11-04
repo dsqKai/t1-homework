@@ -1,0 +1,36 @@
+server:
+  port: 8081
+
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  liquibase:
+    enabled: false
+  h2:
+    console:
+      enabled: true
+
+
+t1:
+  credit-limit: 10000.00
+  kafka:
+    topic:
+      transaction-process: t1_demo_client_transactions
+      error-transaction: t1_demo_client_transaction_errors
+      correction-transaction: t1_demo_transaction_correction
+    listener:
+      transaction-process: transaction-process
+      transaction-correction: transaction-correction
+    bootstrap-servers: ${KAFKA_SERVER:localhost}:${KAFKA_PORT:9092}
+    consumer:
+      group-id: my-group
+

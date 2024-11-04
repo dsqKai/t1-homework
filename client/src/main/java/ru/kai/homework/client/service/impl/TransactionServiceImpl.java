@@ -100,7 +100,7 @@ public class TransactionServiceImpl implements TransactionService {
         return transaction;
     }
 
-    private void processTransaction(Transaction transaction) {
+    public void processTransaction(Transaction transaction) {
         Account account = transaction.getAccount();
         BigDecimal newBalance = Operation.calculateBalance(account.getBalance(), transaction.getAmount(), transaction.getType());
         account.setBalance(newBalance);

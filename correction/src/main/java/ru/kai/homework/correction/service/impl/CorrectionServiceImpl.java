@@ -26,10 +26,10 @@ public class CorrectionServiceImpl implements CorrectionService {
     private final CorrectionProducer producer;
 
     @Value("${t1.retry.max-attempts:3}")
-    private int maxAttempts;
+    public int maxAttempts;
 
     @Value("${t1.retry.page-size:1000}")
-    private int pageSize;
+    public int pageSize;
 
     @Transactional
     public void newCorrection(UUID transactionId) {
@@ -37,7 +37,7 @@ public class CorrectionServiceImpl implements CorrectionService {
                 .orElse(new Correction(transactionId, 0, CorrectionStatus.PENDING));
         correction.setStatus(CorrectionStatus.PENDING);
         if (correction.getAttempts() < maxAttempts) {
-            ResponseEntity<TransactionStatus> response = transactionServiceClient.retryTransaction(transactionId, "TEST");
+            ResponseEntity<TransactionStatus> response = transactionServiceClient.retryTransaction(transactionId);
             correction.incrementAttempts();
             if(response.getBody() == TransactionStatus.ERROR) {
                 repository.save(correction);
@@ -47,8 +47,13 @@ public class CorrectionServiceImpl implements CorrectionService {
         }
     }
 
+    public boolean authorizeTransaction(UUID transactionId) {
+        Boolean authorized = transactionServiceClient.authorizeTransaction(transactionId).getBody();
+        return authorized != null && authorized;
+    }
+
     @Transactional
-    @Scheduled(fixedRateString = "${t1.retry.interval:60000}")
+    @Scheduled(fixedRateString = "${t1.retry.interval:60000}", initialDelayString = "${t1.retry.initialDelay:60000}")
     public void retryFailedTransactions() {
         int page = 0;
         Page<Correction> correctionPage;

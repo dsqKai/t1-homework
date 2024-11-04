@@ -22,7 +22,7 @@ public class AccountServiceImpl implements AccountService {
     private final AccountMapper accountMapper;
 
     @Value("${t1.credit-limit}")
-    private BigDecimal defaultCreditLimit;
+    public BigDecimal defaultCreditLimit;
 
     @Transactional
     public Account registerAccount(AccountRequest request) {
